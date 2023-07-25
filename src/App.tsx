@@ -28,10 +28,9 @@ function Insert() {
   }
   return (
     <>
-      <form onSubmit={handleInsert}>
-        <h2>Add a new food</h2>
-
-        <textarea
+      <form className="add-form" onSubmit={handleInsert}>
+        <input
+          type="text"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
           placeholder="Description"
@@ -82,7 +81,7 @@ function List() {
   return (
     <>
       <header>
-        <h1>Most recent dishes</h1>
+        <h1>All dishes</h1>
       </header>
 
       <Insert />
@@ -130,7 +129,7 @@ function Search() {
         <h1>Search dishes</h1>
       </header>
 
-      <form onSubmit={handleSearch}>
+      <form className="search-form" onSubmit={handleSearch}>
         <input
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
@@ -149,11 +148,9 @@ function Search() {
             </option>
           ))}
         </select>
-        <input
-          type="submit"
-          value="Search"
-          disabled={!searchText || searchInProgress}
-        />
+        <button type="submit" disabled={!searchText || searchInProgress}>
+          Search
+        </button>
       </form>
       {searchResults !== undefined && (
         <ul>

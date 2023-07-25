@@ -82,7 +82,7 @@ export const insertRow = internalMutation({
 });
 
 export const list = query(async (ctx) => {
-  const docs = await ctx.db.query("foods").order("desc").take(10);
+  const docs = await ctx.db.query("foods").order("desc").collect();
   return docs.map((doc) => {
     return { _id: doc._id, description: doc.description, cuisine: doc.cuisine };
   });

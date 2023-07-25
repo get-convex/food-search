@@ -11,4 +11,22 @@ export default defineSchema({
     dimension: 1536,
     filterFields: ["cuisine"],
   }),
+  nyTimes: defineTable({
+    embedding: v.array(v.float64()),
+  }).vectorIndex("by_embedding", {
+    vectorField: "embedding",
+    dimension: 256,
+    filterFields: [],
+  }),
+
+  random2kfilter: defineTable({
+    embedding: v.array(v.float64()),
+
+    lowCardinalityFilter: v.string(),
+    highCardinalityFilter: v.number(),
+  }).vectorIndex("by_embedding", {
+    vectorField: "embedding",
+    dimension: 2048,
+    filterFields: ["highCardinalityFilter", "lowCardinalityFilter"],
+  }),
 });

@@ -115,6 +115,21 @@ export const search = action({
   },
 });
 
+export const queryNyTimes = action({
+  handler: async (ctx) => {
+    const vector = [];
+    for (let i = 0; i < 256; i++) {
+      const elem = Math.random();
+      vector.push(elem);
+    }
+    return await ctx.vectorSearch("nyTimes", "by_embedding", {
+      vectorField: "embedding",
+      vector,
+      limit: 8,
+    });
+  }
+})
+
 export const fetchResults = internalQuery({
   args: {
     results: v.array(v.object({ _id: v.id("foods"), score: v.float64() })),
@@ -136,3 +151,63 @@ export const fetchResults = internalQuery({
     return out;
   },
 });
+
+export const query2k = action({
+  args: {
+    color: v.optional(v.string()),
+    colors: v.optional(v.array(v.string())),
+    weight: v.optional(v.number()),
+    weights: v.optional(v.array(v.number())),
+  },
+  handler: async (ctx, args) => {
+    const vector = [];
+    for (let i = 0; i < 2048; i++) {
+      const elem = Math.random();
+      vector.push(elem);
+    }
+    return await ctx.vectorSearch("random2kfilter", "by_embedding", {
+      vectorField: "embedding",
+      vector,
+      limit: 8,
+      filter: (q) => {
+        if (args.color !== undefined) {
+          q = q.eq("lowCardinalityFilter", args.color);
+        }
+        if (args.colors !== undefined) {
+          q = q.in("lowCardinalityFilter", args.colors);
+        }
+        if (args.weight !== undefined) {
+          q = q.eq("highCardinalityFilter", args.weight);
+        }
+        if (args.weights !== undefined) {
+          q = q.in("highCardinalityFilter", args.weights);
+        }
+        return q;
+      }
+    });
+  }
+})
+
+export const populate2k = mutation({
+  args: {
+    n: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const colors = ["red", "blue", "green", "orange", "yellow", "indigo", "violet"];
+
+    for (let i = 0; i < args.n; i++) {
+      const color = Math.floor(Math.random() * colors.length);
+      const weight = Math.floor(Math.random() * 10000);
+      const embedding = [];
+      for (let j = 0; j < 2048; j++) {
+        embedding.push(Math.random());
+      }
+      const doc = {
+        embedding,
+        lowCardinalityFilter: colors[color],
+        highCardinalityFilter: weight,
+      };
+      await ctx.db.insert("random2kfilter", doc);
+    }
+  }
+})

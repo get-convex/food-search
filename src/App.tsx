@@ -28,6 +28,7 @@ function Insert() {
   }
   return (
     <>
+      <h2 className="form-title">New dish</h2>
       <form className="add-form" onSubmit={handleInsert}>
         <input
           type="text"
@@ -140,7 +141,10 @@ function Search() {
 
         <div className="pills">
           {Object.entries(CUISINES).map(([c, e]) => (
-            <label className={searchFilter.includes(c) ? "pill-selected" : ""}>
+            <label
+              key={c}
+              className={searchFilter.includes(c) ? "pill-selected" : ""}
+            >
               <input
                 type="checkbox"
                 checked={searchFilter.includes(c)}

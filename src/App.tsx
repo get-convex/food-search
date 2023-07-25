@@ -3,6 +3,11 @@ import { useAction, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { SearchResult } from "../convex/vectorDemo";
 import { CUISINES } from "../convex/constants";
+import { Tab } from "@headlessui/react";
+
+function presentCuisine(name: string, emoji: string) {
+  return `${emoji} ${name[0].toUpperCase()}${name.slice(1)}`;
+}
 
 function Insert() {
   const [description, setDescription] = useState("");
@@ -23,9 +28,9 @@ function Insert() {
   }
   return (
     <>
-      <h2>Add a new food</h2>
-      <form onSubmit={handleInsert}>
-        <textarea
+      <form className="add-form" onSubmit={handleInsert}>
+        <input
+          type="text"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
           placeholder="Description"
@@ -37,18 +42,59 @@ function Insert() {
             </option>
           ))}
         </select>
-        <input
-          type="submit"
-          value="Insert"
-          disabled={!description || insertInProgress}
-        />
+        <button type="submit" disabled={!description || insertInProgress}>
+          Insert
+        </button>
       </form>
     </>
   );
 }
 
-function presentCuisine(name: string, emoji: string) {
-  return `${emoji} ${name[0].toUpperCase()}${name.slice(1)}`;
+function Populate() {
+  const [submitted, setSubmitted] = useState(false);
+  const populate = useAction(api.vectorDemo.populate);
+
+  return (
+    <div className="populate">
+      <p>No entries yet.</p>
+      <button
+        type="submit"
+        onClick={() => {
+          setSubmitted(true);
+          populate();
+        }}
+        disabled={submitted}
+      >
+        Populate test data
+      </button>
+    </div>
+  );
+}
+
+function Loading() {
+  return <div className="loading">Loading…</div>;
+}
+
+function List() {
+  const entries = useQuery(api.vectorDemo.list);
+
+  return (
+    <>
+      <header>
+        <h1>All dishes</h1>
+      </header>
+
+      <Insert />
+
+      {entries === undefined && <Loading />}
+
+      {entries !== undefined && entries.length === 0 && <Populate />}
+
+      {entries?.map((entry) => (
+        <Dish key={entry._id} {...entry} />
+      ))}
+    </>
+  );
 }
 
 function Search() {
@@ -79,8 +125,11 @@ function Search() {
   };
   return (
     <>
-      <h2>Search foods (Cmd-click to add filters)</h2>
-      <form onSubmit={handleSearch}>
+      <header>
+        <h1>Search dishes</h1>
+      </header>
+
+      <form className="search-form" onSubmit={handleSearch}>
         <input
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
@@ -99,20 +148,14 @@ function Search() {
             </option>
           ))}
         </select>
-        <input
-          type="submit"
-          value="Search"
-          disabled={!searchText || searchInProgress}
-        />
+        <button type="submit" disabled={!searchText || searchInProgress}>
+          Search
+        </button>
       </form>
       {searchResults !== undefined && (
         <ul>
           {searchResults.map((result) => (
-            <li key={result._id}>
-              <span>{(CUISINES as any)[result.cuisine]}</span>
-              <span>{result.description}</span>
-              <span>{result.score.toFixed(4)}</span>
-            </li>
+            <Dish key={result._id} {...result} />
           ))}
         </ul>
       )}
@@ -120,45 +163,76 @@ function Search() {
   );
 }
 
-export default function App() {
-  const entries = useQuery(api.vectorDemo.list);
-  const [submitted, setSubmitted] = useState(false);
-  const populate = useAction(api.vectorDemo.populate);
+export function Dish({
+  _id,
+  description,
+  cuisine,
+  score,
+}: {
+  _id: string;
+  description: string;
+  cuisine: string;
+  score?: number;
+}) {
   return (
-    <main>
-      <h1>🍔 Food vector search</h1>
-      <h2>Entries (ten most recent)</h2>
-      {entries === undefined && (
-        <center>
-          <i>Loading...</i>
-        </center>
-      )}
-      {entries !== undefined && entries.length === 0 && (
-        <center>
-          <p><i>No entries yet</i></p>
-          <input
-            type="submit"
-            value="Populate test data"
-            onClick={() => {
-              setSubmitted(true);
-              populate();
-            }}
-            disabled={submitted}
-          />
-        </center>
-      )}
-      {entries && entries.length > 0 && (
-        <ul>
-          {entries.map((entry) => (
-            <li key={entry._id.toString()}>
-              <span>{(CUISINES as any)[entry.cuisine]}</span>
-              <span>{entry.description}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-      <Insert />
-      <Search />
-    </main>
+    <article>
+      <h3>
+        <span>{CUISINES[cuisine as keyof typeof CUISINES]}</span>
+        {cuisine}
+      </h3>
+      {score !== undefined && <span className="score">{score.toFixed(4)}</span>}
+      <p>{description}</p>
+    </article>
+  );
+}
+
+export default function App() {
+  return (
+    <div className="app">
+      <Tab.Group>
+        <Tab.Panels>
+          <Tab.Panel>
+            <List />
+          </Tab.Panel>
+          <Tab.Panel>
+            <Search />
+          </Tab.Panel>
+        </Tab.Panels>
+        <Tab.List className="tabs">
+          <Tab>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+              />
+            </svg>
+            Dishes
+          </Tab>
+          <Tab>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+              />
+            </svg>
+            Search
+          </Tab>
+        </Tab.List>
+      </Tab.Group>
+    </div>
   );
 }

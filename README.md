@@ -29,5 +29,5 @@ Use Cmd-Click to pick different cuisines to restrict the search to.
 
 Try it out at [https://food-search-zeta.vercel.app/](https://food-search-zeta.vercel.app/)!
 
-![image](https://github.com/get-convex/food-search/assets/5784949/3a41eda5-9cb5-4ba6-bfbc-06809646386b)
+![image](https://github.com/get-convex/food-search/assets/5784949/22e2b785-1bc2-42e9-847f-6620361c1ea8)
 

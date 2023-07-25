@@ -26,3 +26,8 @@ top of the page.
 The "Search" view performs semantic search over foods' descriptions by using
 a nearest neighbors query. You can also optionally filter for specific cuisines:
 Use Cmd-Click to pick different cuisines to restrict the search to.
+
+Try it out at [https://food-search-zeta.vercel.app/](https://food-search-zeta.vercel.app/)!
+
+![image](https://github.com/get-convex/food-search/assets/5784949/3a41eda5-9cb5-4ba6-bfbc-06809646386b)
+

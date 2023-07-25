@@ -99,7 +99,9 @@ function List() {
 
 function Search() {
   const [searchText, setSearchText] = useState("");
-  const [searchFilter, setSearchFilter] = useState<string[]>([]);
+  const [searchFilter, setSearchFilter] = useState<string[]>(
+    Object.keys(CUISINES)
+  );
   const [searchResults, setSearchResults] = useState<
     SearchResult[] | undefined
   >();
@@ -135,30 +137,34 @@ function Search() {
           onChange={(e) => setSearchText(e.target.value)}
           placeholder="Query"
         />
-        <select
-          value={searchFilter}
-          multiple={true}
-          onChange={(e) =>
-            setSearchFilter([...e.target.selectedOptions].map((o) => o.value))
-          }
-        >
+
+        <div className="pills">
           {Object.entries(CUISINES).map(([c, e]) => (
-            <option key={c} value={c}>
+            <label className={searchFilter.includes(c) ? "pill-selected" : ""}>
+              <input
+                type="checkbox"
+                checked={searchFilter.includes(c)}
+                onChange={() => {
+                  const index = searchFilter.indexOf(c);
+                  if (index === -1) {
+                    setSearchFilter([...searchFilter, c]);
+                  } else {
+                    const newValue = [...searchFilter];
+                    newValue.splice(index, 1);
+                    setSearchFilter(newValue);
+                  }
+                }}
+              />
               {presentCuisine(c, e)}
-            </option>
+            </label>
           ))}
-        </select>
+        </div>
         <button type="submit" disabled={!searchText || searchInProgress}>
           Search
         </button>
       </form>
-      {searchResults !== undefined && (
-        <ul>
-          {searchResults.map((result) => (
-            <Dish key={result._id} {...result} />
-          ))}
-        </ul>
-      )}
+      {searchResults !== undefined &&
+        searchResults.map((result) => <Dish key={result._id} {...result} />)}
     </>
   );
 }
